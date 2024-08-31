@@ -25,8 +25,8 @@
           ></v-text-field>
         </v-responsive>
 
-        <v-btn>登陆</v-btn>
-        <v-btn min-width="50">注册</v-btn>
+        <v-btn href="/auth/userLogin">登陆</v-btn>
+        <v-btn min-width="50" href="/auth/userLogin?actions=register">注册</v-btn>
       </v-container>
     </v-app-bar>
 

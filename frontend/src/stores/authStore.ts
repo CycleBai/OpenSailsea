@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    isAuthenticated: true // 默认未认证
+    isAuthenticated: false // 默认未认证
   }),
   actions: {
     login() {
