@@ -24,6 +24,11 @@ const router = createRouter({
       name: 'createPost',
       component: () => import('../views/NewPost.vue'),
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/p/:pageId',
+      name: 'showStaticPage',
+      component: () => import('../views/StaticPage.vue')
     }
   ]
 })
