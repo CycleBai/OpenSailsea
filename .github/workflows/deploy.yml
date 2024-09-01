@@ -38,14 +38,19 @@ jobs:
 
       - name: Create Release
         id: create_release
-        run: |
-          VERSION=$(date +'%Y%m%d%H%M%S')
-          gh release create frontend_preview-${VERSION} dist.zip --title "Frontend Preview ${VERSION}" --notes "Automated release for frontend preview."
+        uses: actions/create-release@v1
+        with:
+          tag_name: frontend_preview-${{ github.run_id }}
+          release_name: Frontend Preview ${{ github.run_id }}
+          draft: false
+          prerelease: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
         with:
-          name: frontend-dist
-          path: frontend/dist.zip
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: frontend/dist.zip
+          asset_name: dist.zip
+          asset_content_type: application/zip
