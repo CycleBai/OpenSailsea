@@ -3,7 +3,7 @@
     <v-app-bar flat>
       <v-container class="mx-auto d-flex align-center justify-center">
         <v-avatar class="me-4" color="grey-darken-1" size="32"></v-avatar>
-        <h2>SailSea 讨论</h2>
+        <h2 @click="router.push('/')">SailSea 讨论</h2>
 
         <v-spacer></v-spacer>
 
@@ -25,8 +25,16 @@
           ></v-text-field>
         </v-responsive>
 
-        <v-btn href="/auth/userLogin">登陆</v-btn>
-        <v-btn min-width="50" href="/auth/userLogin?actions=register">注册</v-btn>
+        <!-- 根据 isAuthenticated 状态渲染不同的内容 -->
+        <template v-if="isAuthenticated">
+          <v-avatar size="40">
+            <v-avatar class="me-4" color="grey-darken-1" size="32"></v-avatar>
+          </v-avatar>
+        </template>
+        <template v-else>
+          <v-btn href="/auth/userLogin">登陆</v-btn>
+          <v-btn min-width="50" href="/auth/userLogin?actions=register">注册</v-btn>
+        </template>
       </v-container>
     </v-app-bar>
 
@@ -61,6 +69,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '../stores/authStore' // 导入 authStore
+
+const authStore = useAuthStore()
+const isAuthenticated = authStore.isAuthenticated
 
 const links = ['Dashboard', 'Messages', 'Profile', 'Updates']
 const searchField = ref<HTMLElement | null>(null)

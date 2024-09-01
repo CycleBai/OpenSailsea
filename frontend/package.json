@@ -15,6 +15,7 @@
   "dependencies": {
     "md-editor-v3": "^4.19.2",
     "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.3",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3",
     "vuetify": "^3.7.1"
