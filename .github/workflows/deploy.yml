@@ -1,0 +1,39 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main # 你可以根据需要更改为适合的分支
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18" # 或你使用的其他 Node.js 版本
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          pnpm install
+
+      - name: Build project
+        run: |
+          cd frontend
+          pnpm build
+
+      - name: Create Tag and Release
+        run: |
+          git tag frontend_preview
+          git push origin frontend_preview
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
