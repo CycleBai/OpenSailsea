@@ -1,109 +1,161 @@
 <template>
-  <v-app id="inspire">
-    <v-app-bar flat>
-      <v-container class="mx-auto d-flex align-center justify-center">
-        <v-avatar class="me-4" color="grey-darken-1" size="32"></v-avatar>
-        <h2 @click="router.push('/')">SailSea 讨论</h2>
+  <a-layout id="inspire">
+    <a-layout-header
+      :style="{
+        backgroundColor: '#fff',
+        padding: '0 50px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }"
+    >
+      <div :style="{ display: 'flex', alignItems: 'center' }">
+        <a-avatar :style="{ backgroundColor: '#757575', marginRight: '16px' }" size="32"></a-avatar>
+        <h2
+          @click="() => router.push('/')"
+          :style="{ margin: 0, display: 'flex', alignItems: 'center' }"
+        >
+          SailSea 讨论
+        </h2>
+      </div>
 
-        <v-spacer></v-spacer>
+      <div :style="{ flex: 1, display: 'flex', justifyContent: 'center' }">
+        <a-button v-for="link in links" :key="link" type="link">{{ link }}</a-button>
+      </div>
 
-        <v-btn v-for="link in links" :key="link" :text="link" variant="text"></v-btn>
+      <div :style="{ display: 'flex', alignItems: 'center', maxWidth: '260px' }">
+        <a-input
+          ref="searchInput"
+          v-model:value="searchQuery"
+          placeholder="Search"
+          size="large"
+          @pressEnter="handleSearch"
+        />
+      </div>
 
-        <v-spacer></v-spacer>
+      <!-- 根据 isAuthenticated 状态渲染不同的内容 -->
+      <div v-if="isAuthenticated">
+        <a-avatar size="40" :style="{ marginLeft: '16px' }">
+          <a-avatar
+            :style="{ backgroundColor: '#757575', marginRight: '16px' }"
+            size="32"
+          ></a-avatar>
+        </a-avatar>
+      </div>
+      <div v-else>
+        <a-button type="text" :href="loginLink">登陆</a-button>
+        <a-button type="primary" :href="registerLink">注册</a-button>
+      </div>
+    </a-layout-header>
 
-        <v-responsive max-width="260">
-          <v-text-field
-            ref="searchField"
-            density="compact"
-            label="Search"
-            rounded="lg"
-            variant="solo-filled"
-            flat
-            hide-details
-            single-line
-            @keydown.enter="handleSearch"
-          ></v-text-field>
-        </v-responsive>
+    <a-layout-content :style="{ backgroundColor: '#f5f5f5', padding: '24px' }">
+      <a-row gutter="16">
+        <a-col :span="4">
+          <a-card :style="{ borderRadius: '8px' }">
+            <a-list :bordered="false">
+              <a-list-item>
+                <a-button type="default" block @click="handleNewPostClick"
+                  ><EditOutlined /> 新帖子</a-button
+                >
+              </a-list-item>
 
-        <!-- 根据 isAuthenticated 状态渲染不同的内容 -->
-        <template v-if="isAuthenticated">
-          <v-avatar size="40">
-            <v-avatar class="me-4" color="grey-darken-1" size="32"></v-avatar>
-          </v-avatar>
-        </template>
-        <template v-else>
-          <v-btn href="/auth/userLogin">登陆</v-btn>
-          <v-btn min-width="50" href="/auth/userLogin?actions=register">注册</v-btn>
-        </template>
-      </v-container>
-    </v-app-bar>
+              <a-divider style="margin: 16px 0"></a-divider>
 
-    <v-main class="bg-grey-lighten-3">
-      <v-container>
-        <v-row>
-          <v-col cols="2">
-            <v-sheet rounded="lg">
-              <v-list rounded="lg">
-                <v-list-item>
-                  <v-btn variant="outlined" prepend-icon="mdi-pencil" block>新帖子</v-btn>
-                </v-list-item>
+              <a-list-item>
+                <a-button type="link">所有分类</a-button>
+              </a-list-item>
+            </a-list>
+          </a-card>
+        </a-col>
 
-                <v-divider class="my-2"></v-divider>
+        <a-col :span="20">
+          <a-card :style="{ minHeight: '70vh', borderRadius: '8px' }">
+            <slot></slot>
+          </a-card>
+        </a-col>
+      </a-row>
+    </a-layout-content>
 
-                <v-list-item link>所有分类</v-list-item>
-              </v-list>
-            </v-sheet>
-          </v-col>
-
-          <v-col>
-            <v-sheet min-height="70vh" rounded="lg">
-              <slot></slot>
-            </v-sheet>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-main>
-  </v-app>
+    <!-- NewPost Drawer -->
+    <a-drawer
+      v-model:visible="drawerVisible"
+      title="新帖子"
+      placement="bottom"
+      :height="drawerHeight"
+      :closable="false"
+      @close="handleCloseDrawer"
+      class="custom-drawer"
+    >
+      <NewPost :hideLayout="true" />
+      <template #extra>
+        <a-button @click="openInNewWindow"> 在新窗口打开 </a-button>
+        <a-button @click="toggleFullscreen" style="margin-left: 8px">
+          {{ isFullscreen ? '退出全屏' : '全屏' }}
+        </a-button>
+      </template>
+    </a-drawer>
+  </a-layout>
 </template>
 
 <script setup lang="ts">
+import { EditOutlined } from '@ant-design/icons-vue'
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '../stores/authStore' // 导入 authStore
+import { useAuthStore } from '../stores/authStore'
+import NewPost from './NewPost.vue'
 
 const authStore = useAuthStore()
-const isAuthenticated = authStore.isAuthenticated
+const isAuthenticated = ref(authStore.isAuthenticated)
 
 const links = ['Dashboard', 'Messages', 'Profile', 'Updates']
-const searchField = ref<HTMLElement | null>(null)
 const router = useRouter()
 const route = useRoute()
-const isSearching = ref(false) // 状态标志
+
+const searchQuery = ref('')
+const searchInput = ref<HTMLInputElement | null>(null)
+
+const loginLink = '/auth/userLogin'
+const registerLink = '/auth/userLogin?actions=register'
+
+const drawerVisible = ref(false)
+const isFullscreen = ref(false)
+const drawerHeight = ref('50%')
+
+const handleSearch = () => {
+  const query = searchQuery.value.trim()
+  if (query) {
+    router.push(`/searchPost/${encodeURIComponent(query)}`)
+  }
+}
 
 const handleKeydown = (event: KeyboardEvent) => {
   if (event.ctrlKey && event.key === 'k') {
     event.preventDefault()
-    searchField.value?.focus()
+    if (searchInput.value) {
+      searchInput.value.focus()
+    }
   }
 }
 
-const handleSearch = () => {
-  if (isSearching.value) return // 防止双击回车
+const handleNewPostClick = () => {
+  if (authStore.isAuthenticated) {
+    drawerVisible.value = true
+  } else {
+    router.push(loginLink)
+  }
+}
 
-  isSearching.value = true
-  setTimeout(() => {
-    const query = (searchField.value as HTMLInputElement).value
-    if (query) {
-      const newPath = `/searchPost/${encodeURIComponent(query)}`
-      if (route.path.startsWith('/searchPost/')) {
-        // Use new URL to refresh the page
-        window.location.href = newPath
-      } else {
-        router.replace(newPath)
-      }
-    }
-    isSearching.value = false
-  }, 100) // 延迟执行
+const handleCloseDrawer = () => {
+  drawerVisible.value = false
+}
+
+const toggleFullscreen = () => {
+  isFullscreen.value = !isFullscreen.value
+  drawerHeight.value = isFullscreen.value ? '100vh' : '50%'
+}
+
+const openInNewWindow = () => {
+  window.open('/post/create', '_blank')
 }
 
 onMounted(() => {
@@ -114,3 +166,18 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 </script>
+
+<style scoped>
+.custom-drawer .ant-drawer-body {
+  overflow: hidden;
+}
+
+.custom-drawer {
+  .ant-drawer-content {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    border-radius: 0;
+  }
+}
+</style>

@@ -3,6 +3,8 @@ import { createPinia } from 'pinia'
 import piniaPersistedstate from 'pinia-plugin-persistedstate'
 
 // Vuetify
+import Antd from 'ant-design-vue'
+import 'ant-design-vue/dist/reset.css'
 import 'vuetify/styles'
 import { createVuetify } from 'vuetify'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
@@ -33,5 +35,6 @@ pinia.use(piniaPersistedstate)
 app.use(pinia)
 app.use(router)
 app.use(vuetify)
+app.use(Antd)
 
 app.mount('#app')

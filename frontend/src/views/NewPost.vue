@@ -1,5 +1,5 @@
 <template>
-  <AppLayout>
+  <component :is="hideLayout ? 'div' : AppLayout">
     <v-container>
       <h2>创建新文章</h2>
       <v-form>
@@ -32,14 +32,18 @@
         <v-btn variant="text">存为本地草稿</v-btn>
       </v-form>
     </v-container>
-  </AppLayout>
+  </component>
 </template>
 
 <script setup lang="ts">
 import AppLayout from './AppLayout.vue'
-import { ref } from 'vue'
+import { ref, computed, defineProps } from 'vue'
 import { MdEditor } from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
+
+const props = defineProps<{
+  hideLayout?: boolean
+}>()
 
 // 文章标题
 const title = ref('')
