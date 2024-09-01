@@ -3,7 +3,7 @@ name: Deploy Frontend
 on:
   push:
     branches:
-      - main # 你可以根据需要更改为适合的分支
+      - main
 
 jobs:
   build:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18" # 或你使用的其他 Node.js 版本
+          node-version: "18"
 
       - name: Install pnpm
         run: npm install -g pnpm
@@ -29,11 +29,18 @@ jobs:
       - name: Build project
         run: |
           cd frontend
-          pnpm build-only
+          pnpm build
 
-      - name: Create Tag and Release
+      - name: Create Release
+        id: create_release
         run: |
-          git tag frontend_preview
-          git push origin frontend_preview
+          VERSION=$(date +'%Y%m%d%H%M%S')
+          gh release create frontend_preview-${VERSION} frontend/dist/** --title "Frontend Preview ${VERSION}" --notes "Automated release for frontend preview."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-dist
+          path: frontend/dist
